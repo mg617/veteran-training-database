@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVRP Veteran Training Database</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .controls select, .controls input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .controls button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .controls button:hover {
+            background: #218838;
+        }
+        
+        .stats {
+            padding: 15px 30px;
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        th {
+            background: #495057;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .category-it { border-left: 4px solid #007bff; }
+        .category-customer-service { border-left: 4px solid #28a745; }
+        .category-manufacturing { border-left: 4px solid #ffc107; }
+        .category-hospitality { border-left: 4px solid #fd7e14; }
+        .category-office { border-left: 4px solid #6f42c1; }
+        .category-safety { border-left: 4px solid #dc3545; }
+        .category-healthcare { border-left: 4px solid #20c997; }
+        .category-transportation { border-left: 4px solid #17a2b8; }
+        
+        .format-virtual { background: #e8f5e8; }
+        .format-inperson { background: #fff3cd; }
+        .format-hybrid { background: #e2e3f3; }
+        
+        .cost-free { color: #28a745; font-weight: 600; }
+        .cost-low { color: #ffc107; font-weight: 600; }
+        .cost-medium { color: #fd7e14; font-weight: 600; }
+        .cost-high { color: #dc3545; font-weight: 600; }
+        
+        .description {
+            max-width: 300px;
+            line-height: 1.4;
+        }
+        
+        .certification {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+            margin: 1px;
+        }
+        
+        .duration {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HVRP Veteran Training Database</h1>
+            <p>Comprehensive training programs for homeless veterans transitioning to new careers</p>
+        </div>
+        
+        <div class="controls">
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="IT & Cybersecurity">IT & Cybersecurity</option>
+                <option value="Customer Service">Customer Service</option>
+                <option value="Manufacturing & Industrial">Manufacturing & Industrial</option>
+                <option value="Hospitality & Food Service">Hospitality & Food Service</option>
+                <option value="Office Administration">Office Administration</option>
+                <option value="Safety & Compliance">Safety & Compliance</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Transportation">Transportation</option>
+            </select>
+            
+            <select id="formatFilter">
+                <option value="">All Formats</option>
+                <option value="Virtual">Virtual</option>
+                <option value="In-Person">In-Person</option>
+                <option value="Hybrid">Hybrid</option>
+            </select>
+            
+            <select id="costFilter">
+                <option value="">All Costs</option>
+                <option value="Free">Free</option>
+                <option value="Under $100">Under $100</option>
+                <option value="$100-$500">$100-$500</option>
+                <option value="$500+">$500+</option>
+            </select>
+            
+            <input type="text" id="searchInput" placeholder="Search trainings...">
+            
+            <button onclick="copyToClipboard()">Copy Data to Clipboard</button>
+            <button onclick="exportToCSV()">Export to CSV</button>
+        </div>
+        
+        <div class="stats">
+            <span id="statsDisplay">Loading training programs...</span>
+        </div>
+        
+        <div class="table-container">
+            <table id="trainingTable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Format</th>
+                        <th>Schedule</th>
+                        <th>Certification</th>
+                        <th>Duration</th>
+                        <th>Cost</th>
+                        <th>Description</th>
+                        <th>Provider</th>
+                        <th>Link</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody id="trainingBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Training database with proper syntax
+        const trainings = [
+            {
+                title: "CompTIA A+ Core 1 (220-1101)",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "CompTIA A+ Core 1",
+                duration: "40-60 hours",
+                cost: "$370",
+                description: "Foundational IT skills covering mobile devices, networking, hardware, virtualization and cloud computing. Essential for entry-level IT support roles.",
+                provider: "CompTIA",
+                link: "https://www.comptia.org/certifications/a",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "CompTIA Network+ (N10-008)",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "CompTIA Network+",
+                duration: "60-80 hours",
+                cost: "$370",
+                description: "Networking concepts, infrastructure, network operations, security, and troubleshooting for network technician roles.",
+                provider: "CompTIA",
+                link: "https://www.comptia.org/certifications/network",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "CompTIA Security+ (SY0-601)",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "CompTIA Security+",
+                duration: "50-70 hours",
+                cost: "$370",
+                description: "Cybersecurity fundamentals, threats, vulnerabilities, identity management, and risk management. DOD 8570 approved.",
+                provider: "CompTIA",
+                link: "https://www.comptia.org/certifications/security",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Complete Web Development Bootcamp",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Certificate of Completion",
+                duration: "65 hours",
+                cost: "$84.99",
+                description: "Full-stack web development with HTML, CSS, JavaScript, Node.js, React, and databases. Includes 16 projects.",
+                provider: "Udemy",
+                link: "https://www.udemy.com/course/the-complete-web-development-bootcamp/",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Python Programming Bootcamp",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Python Programming Certificate",
+                duration: "32 hours",
+                cost: "$74.99",
+                description: "Python programming fundamentals, data structures, web scraping, and database programming for beginners.",
+                provider: "Udemy",
+                link: "https://www.udemy.com/course/complete-python-bootcamp/",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "AWS Certified Cloud Practitioner",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "AWS Exam Preparation",
+                duration: "20 hours",
+                cost: "$74.99",
+                description: "AWS cloud fundamentals, services, security, and pricing. Prepares for AWS Cloud Practitioner exam.",
+                provider: "Udemy",
+                link: "https://www.udemy.com/course/aws-certified-cloud-practitioner-new/",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Microsoft Azure Fundamentals (AZ-900)",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Azure Fundamentals",
+                duration: "25-30 hours",
+                cost: "$99",
+                description: "Cloud computing concepts, Azure services, security, compliance, and Azure pricing. Entry-level cloud certification.",
+                provider: "Microsoft Learn",
+                link: "https://docs.microsoft.com/en-us/learn/paths/azure-fundamentals/",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Google IT Support Professional",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Google Career Certificate",
+                duration: "3-6 months",
+                cost: "$39/month",
+                description: "IT fundamentals, networking, operating systems, system administration, and security for help desk roles.",
+                provider: "Coursera/Google",
+                link: "https://www.coursera.org/professional-certificates/google-it-support",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Cybersecurity Fundamentals (FedVTE)",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "FedVTE Certificate",
+                duration: "16 hours",
+                cost: "Free",
+                description: "Information security basics, threat landscape, risk management, and security controls for government/veteran learners.",
+                provider: "Federal Virtual Training Environment",
+                link: "https://fedvte.usalearning.gov/",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Cisco CCNA Training",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "CCNA Preparation",
+                duration: "70 hours",
+                cost: "$300",
+                description: "Network fundamentals, routing, switching, and network security for Cisco certification.",
+                provider: "Cisco Networking Academy",
+                link: "https://www.netacad.com/courses/networking",
+                category: "IT & Cybersecurity"
+            },
+            {
+                title: "Customer Service Fundamentals",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Customer Service Certificate",
+                duration: "8 hours",
+                cost: "$49",
+                description: "Communication skills, conflict resolution, problem-solving, and customer relationship management fundamentals.",
+                provider: "Coursera",
+                link: "https://www.coursera.org/learn/customer-service",
+                category: "Customer Service"
+            },
+            {
+                title: "Call Center Training",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Certificate of Completion",
+                duration: "6 hours",
+                cost: "$39.99",
+                description: "Phone etiquette, active listening, handling difficult customers, and call center best practices.",
+                provider: "Udemy",
+                link: "https://www.udemy.com/course/call-center-customer-service-training/",
+                category: "Customer Service"
+            },
+            {
+                title: "Zendesk Administrator Certification",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Zendesk Certified Admin",
+                duration: "12 hours",
+                cost: "Free",
+                description: "Zendesk platform administration, ticket management, automation, and customer support workflows.",
+                provider: "Zendesk",
+                link: "https://training.zendesk.com/learn/learning_plan/view/10/administrator-certification",
+                category: "Customer Service"
+            },
+            {
+                title: "Salesforce CRM Fundamentals",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Salesforce Admin",
+                duration: "25 hours",
+                cost: "$200",
+                description: "CRM systems, customer data management, sales processes, and Salesforce platform basics.",
+                provider: "Salesforce",
+                link: "https://trailhead.salesforce.com/credentials/administratoroverview",
+                category: "Customer Service"
+            },
+            {
+                title: "OSHA 10-Hour General Industry",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "OSHA 10-Hour Card",
+                duration: "10 hours",
+                cost: "$79",
+                description: "Workplace safety fundamentals, hazard recognition, personal protective equipment, and OSHA standards.",
+                provider: "OSHA Training Institute",
+                link: "https://www.osha.gov/training/outreach/general-industry",
+                category: "Safety & Compliance"
+            },
+            {
+                title: "OSHA 30-Hour General Industry",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "OSHA 30-Hour Card",
+                duration: "30 hours",
+                cost: "$189",
+                description: "Comprehensive workplace safety training for supervisors and safety professionals.",
+                provider: "OSHA Training Institute",
+                link: "https://www.osha.gov/training/outreach/general-industry",
+                category: "Safety & Compliance"
+            },
+            {
+                title: "ServSafe Food Handler",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "ServSafe Food Handler",
+                duration: "2 hours",
+                cost: "$15",
+                description: "Basic food safety principles, personal hygiene, cross-contamination prevention, and cleaning procedures.",
+                provider: "National Restaurant Association",
+                link: "https://www.servsafe.com/food-handler",
+                category: "Safety & Compliance"
+            },
+            {
+                title: "ServSafe Manager",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "ServSafe Manager",
+                duration: "8 hours",
+                cost: "$115",
+                description: "Advanced food safety management, HACCP principles, and foodborne illness prevention for managers.",
+                provider: "National Restaurant Association",
+                link: "https://www.servsafe.com/manager",
+                category: "Safety & Compliance"
+            },
+            {
+                title: "CPR/AED Certification",
+                format: "In-Person",
+                schedule: "Scheduled",
+                certification: "CPR/AED Certified",
+                duration: "4 hours",
+                cost: "$95",
+                description: "Adult and pediatric CPR, AED usage, and basic first aid for emergency response situations.",
+                provider: "American Red Cross",
+                link: "https://www.redcross.org/take-a-class/cpr",
+                category: "Safety & Compliance"
+            },
+            {
+                title: "Forklift Operator Certification",
+                format: "In-Person",
+                schedule: "Scheduled",
+                certification: "Forklift License",
+                duration: "8 hours",
+                cost: "$175",
+                description: "Forklift operation, safety procedures, pre-operation inspection, and workplace regulations compliance.",
+                provider: "Local Training Centers",
+                link: "https://www.osha.gov/etools/powered-industrial-trucks",
+                category: "Safety & Compliance"
+            },
+            {
+                title: "Six Sigma Yellow Belt",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Six Sigma Yellow Belt",
+                duration: "16 hours",
+                cost: "$299",
+                description: "Quality improvement fundamentals, DMAIC methodology, and basic statistical tools for process improvement.",
+                provider: "ASQ",
+                link: "https://asq.org/cert/six-sigma-yellow-belt",
+                category: "Manufacturing & Industrial"
+            },
+            {
+                title: "Manufacturing Safety Training",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Manufacturing Safety Certificate",
+                duration: "12 hours",
+                cost: "$149",
+                description: "Machine guarding, lockout/tagout procedures, chemical safety, and manufacturing-specific OSHA standards.",
+                provider: "SafetySkills",
+                link: "https://www.safetyskills.com/manufacturing-safety-training",
+                category: "Manufacturing & Industrial"
+            },
+            {
+                title: "Supply Chain Management",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Supply Chain Certificate",
+                duration: "30 hours",
+                cost: "$299",
+                description: "Procurement, inventory management, logistics, and supply chain optimization principles.",
+                provider: "APICS",
+                link: "https://www.ascm.org/learning-development/certifications-credentials/",
+                category: "Manufacturing & Industrial"
+            },
+            {
+                title: "Warehouse Operations",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Warehouse Management Certificate",
+                duration: "15 hours",
+                cost: "$179",
+                description: "Inventory control, shipping/receiving, warehouse safety, and operational efficiency techniques.",
+                provider: "Warehouse Education",
+                link: "https://www.werc.org/page/Certification",
+                category: "Manufacturing & Industrial"
+            },
+            {
+                title: "CNA Training Program",
+                format: "Hybrid",
+                schedule: "Scheduled",
+                certification: "CNA License",
+                duration: "4-12 weeks",
+                cost: "$500-$1,500",
+                description: "Patient care fundamentals, vital signs, medical terminology, and clinical skills for nursing assistant roles.",
+                provider: "Local Community Colleges",
+                link: "https://www.nurse.org/education/cna-programs/",
+                category: "Healthcare"
+            },
+            {
+                title: "Medical Administrative Assistant",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Medical Admin Certificate",
+                duration: "6-12 weeks",
+                cost: "$799",
+                description: "Medical office procedures, scheduling, billing, electronic health records, and patient communication.",
+                provider: "Penn Foster",
+                link: "https://www.pennfoster.edu/programs/healthcare/medical-administrative-assistant-certificate",
+                category: "Healthcare"
+            },
+            {
+                title: "Medical Billing and Coding",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Medical Coding Certificate",
+                duration: "4-12 months",
+                cost: "$1,299",
+                description: "ICD-10, CPT coding, medical terminology, health information management, and billing procedures.",
+                provider: "AAPC",
+                link: "https://www.aapc.com/training/",
+                category: "Healthcare"
+            },
+            {
+                title: "Commercial Driver License (CDL) Class A",
+                format: "In-Person",
+                schedule: "Scheduled",
+                certification: "CDL Class A",
+                duration: "3-8 weeks",
+                cost: "$3,000-$7,000",
+                description: "Commercial vehicle operation, safety regulations, pre-trip inspections, and DOT compliance for truck driving.",
+                provider: "Local CDL Schools",
+                link: "https://www.fmcsa.dot.gov/registration/commercial-drivers-license",
+                category: "Transportation"
+            },
+            {
+                title: "CDL Class B Training",
+                format: "In-Person",
+                schedule: "Scheduled",
+                certification: "CDL Class B",
+                duration: "2-4 weeks",
+                cost: "$2,000-$4,000",
+                description: "Local delivery and bus operation, vehicle inspection, and commercial driving fundamentals.",
+                provider: "Local CDL Schools",
+                link: "https://www.fmcsa.dot.gov/registration/commercial-drivers-license",
+                category: "Transportation"
+            },
+            {
+                title: "Hazmat Endorsement Training",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Hazmat Endorsement",
+                duration: "8 hours",
+                cost: "$89",
+                description: "Hazardous materials handling, transportation regulations, safety procedures, and DOT compliance.",
+                provider: "National Safety Council",
+                link: "https://www.nsc.org/workplace/safety-topics/hazmat",
+                category: "Transportation"
+            },
+            {
+                title: "Microsoft Office Specialist Excel",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "MOS Excel Expert",
+                duration: "20-30 hours",
+                cost: "$150",
+                description: "Advanced Excel skills including pivot tables, macros, data analysis, and complex formulas.",
+                provider: "Microsoft",
+                link: "https://docs.microsoft.com/en-us/learn/certifications/mos-excel-expert-2019/",
+                category: "Office Administration"
+            },
+            {
+                title: "QuickBooks Certification",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "QuickBooks Certified",
+                duration: "20 hours",
+                cost: "$149",
+                description: "Accounting software fundamentals, invoicing, payroll, reporting, and small business bookkeeping.",
+                provider: "Intuit",
+                link: "https://quickbooks.intuit.com/learn-support/en-us/certification/quickbooks-proadvisor",
+                category: "Office Administration"
+            },
+            {
+                title: "Project Management Professional (PMP) Prep",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "PMP Exam Preparation",
+                duration: "35 hours",
+                cost: "$299",
+                description: "Project management methodologies, leadership, risk management, and PMP exam preparation.",
+                provider: "Project Management Institute",
+                link: "https://www.pmi.org/certifications/project-management-pmp",
+                category: "Office Administration"
+            },
+            {
+                title: "Digital Marketing Fundamentals",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Google Digital Marketing",
+                duration: "40 hours",
+                cost: "Free",
+                description: "Social media marketing, search engine optimization, email marketing, and digital advertising basics.",
+                provider: "Google Digital Garage",
+                link: "https://learndigital.withgoogle.com/digitalgarage/course/digital-marketing",
+                category: "Office Administration"
+            },
+            {
+                title: "Hotel Operations Management",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Hotel Operations Certificate",
+                duration: "30 hours",
+                cost: "$399",
+                description: "Front desk operations, housekeeping management, guest services, and hospitality industry fundamentals.",
+                provider: "American Hotel & Lodging Educational Institute",
+                link: "https://www.ahlei.org/Certifications/",
+                category: "Hospitality & Food Service"
+            },
+            {
+                title: "Restaurant Management",
+                format: "Virtual",
+                schedule: "Self-paced",
+                certification: "Restaurant Management Certificate",
+                duration: "25 hours",
+                cost: "$299",
+                description: "Food service operations, staff management, inventory control, and customer service in restaurant settings.",
+                provider: "National Restaurant Association",
+                link: "https://restaurant.org/education-and-networking/education/",
+                category: "Hospitality & Food Service"
+            },
+            {
+                title: "Bartending Certification",
+                format: "In-Person",
+                schedule: "Scheduled",
+                certification: "Bartending Certificate",
+                duration: "40 hours",
+                cost: "$395",
+                description: "Cocktail preparation, responsible alcohol service, customer interaction, and bar operations.",
+                provider: "Local Bartending Schools",
+                link: "https://www.bartendingschoollocator.com/",
+                category: "Hospitality & Food Service"
+            }
+        ];
+
+        let filteredTrainings = [...trainings];
+
+        function getCategoryClass(category) {
+            const categoryMap = {
+                'IT & Cybersecurity': 'category-it',
+                'Customer Service': 'category-customer-service',
+                'Manufacturing & Industrial': 'category-manufacturing',
+                'Hospitality & Food Service': 'category-hospitality',
+                'Office Administration': 'category-office',
+                'Safety & Compliance': 'category-safety',
+                'Healthcare': 'category-healthcare',
+                'Transportation': 'category-transportation'
+            };
+            return categoryMap[category] || '';
+        }
+
+        function getCostClass(cost) {
+            if (cost === 'Free' || cost.includes('Free')) return 'cost-free';
+            if (cost.includes('$') && parseInt(cost.replace(/[^\d]/g, '')) < 100) return 'cost-low';
+            if (cost.includes('$') && parseInt(cost.replace(/[^\d]/g, '')) < 500) return 'cost-medium';
+            return 'cost-high';
+        }
+
+        function updateStats() {
+            document.getElementById('statsDisplay').textContent = 
+                `Showing ${filteredTrainings.length} of ${trainings.length} training programs`;
+        }
+
+        function renderTrainings() {
+            const tbody = document.getElementById('trainingBody');
+            tbody.innerHTML = '';
+
+            filteredTrainings.forEach(training => {
+                const row = document.createElement('tr');
+                row.className = getCategoryClass(training.category);
+                
+                row.innerHTML = `
+                    <td><strong>${training.title}</strong></td>
+                    <td><span class="format-${training.format.toLowerCase().replace(/[^a-z]/g, '')}">${training.format}</span></td>
+                    <td>${training.schedule}</td>
+                    <td><span class="certification">${training.certification}</span></td>
+                    <td><span class="duration">${training.duration}</span></td>
+                    <td><span class="${getCostClass(training.cost)}">${training.cost}</span></td>
+                    <td class="description">${training.description}</td>
+                    <td>${training.provider}</td>
+                    <td><a href="${training.link}" target="_blank" class="link">View Training</a></td>
+                    <td>${training.category}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            updateStats();
+        }
+
+        function filterTrainings() {
+            const category = document.getElementById('categoryFilter').value;
+            const format = document.getElementById('formatFilter').value;
+            const cost = document.getElementById('costFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredTrainings = trainings.filter(training => {
+                const matchesCategory = !category || training.category === category;
+                const matchesFormat = !format || training.format === format;
+                const matchesCost = !cost || matchesCostFilter(training.cost, cost);
+                const matchesSearch = !search || 
+                    training.title.toLowerCase().includes(search) ||
+                    training.description.toLowerCase().includes(search) ||
+                    training.provider.toLowerCase().includes(search);
+
+                return matchesCategory && matchesFormat && matchesCost && matchesSearch;
+            });
+
+            renderTrainings();
+        }
+
+        function matchesCostFilter(trainingCost, filterCost) {
+            if (filterCost === 'Free') return trainingCost === 'Free' || trainingCost.includes('Free');
+            if (filterCost === 'Under $100') {
+                if (trainingCost === 'Free') return true;
+                const cost = parseInt(trainingCost.replace(/[^\d]/g, ''));
+                return cost > 0 && cost < 100;
+            }
+            if (filterCost === '$100-$500') {
+                const cost = parseInt(trainingCost.replace(/[^\d]/g, ''));
+                return cost >= 100 && cost <= 500;
+            }
+            if (filterCost === '$500+') {
+                const cost = parseInt(trainingCost.replace(/[^\d]/g, ''));
+                return cost > 500;
+            }
+            return true;
+        }
+
+        function copyToClipboard() {
+            const headers = ['Title', 'Format', 'Schedule', 'Certification', 'Duration', 'Cost', 'Description', 'Provider', 'Link', 'Category'];
+            const tsvContent = [
+                headers.join('\t'),
+                ...filteredTrainings.map(training => [
+                    training.title,
+                    training.format,
+                    training.schedule,
+                    training.certification,
+                    training.duration,
+                    training.cost,
+                    training.description.replace(/\t/g, ' ').replace(/\n/g, ' '),
+                    training.provider,
+                    training.link,
+                    training.category
+                ].join('\t'))
+            ].join('\n');
+
+            navigator.clipboard.writeText(tsvContent).then(() => {
+                alert('Data copied to clipboard as tab-separated values! Paste into Excel and it will automatically separate into columns.');
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = tsvContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Data copied to clipboard as tab-separated values! Paste into Excel and it will automatically separate into columns.');
+            });
+        }
+
+        function exportToCSV() {
+            const headers = ['Title', 'Format', 'Schedule', 'Certification', 'Duration', 'Cost', 'Description', 'Provider', 'Link', 'Category'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredTrainings.map(training => [
+                    `"${training.title}"`,
+                    `"${training.format}"`,
+                    `"${training.schedule}"`,
+                    `"${training.certification}"`,
+                    `"${training.duration}"`,
+                    `"${training.cost}"`,
+                    `"${training.description.replace(/"/g, '""')}"`,
+                    `"${training.provider}"`,
+                    `"${training.link}"`,
+                    `"${training.category}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'veteran_training_database.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Event listeners
+        document.getElementById('categoryFilter').addEventListener('change', filterTrainings);
+        document.getElementById('formatFilter').addEventListener('change', filterTrainings);
+        document.getElementById('costFilter').addEventListener('change', filterTrainings);
+        document.getElementById('searchInput').addEventListener('input', filterTrainings);
+
+        // Initial render
+        renderTrainings();
+    </script>
+</body>
+</html>
